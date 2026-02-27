@@ -1,16 +1,13 @@
 #pragma once
-#include <furi.h>
-#include <furi_hal.h>
-#include <furi_hal_power.h>
-#include <gui/gui.h>
-#include <gui/elements.h>
-#include <gui/view.h>
-#include <input/input.h>
-#include <notification/notification.h>
-#include <notification/notification_messages.h>
-#include <notification/notification_app.h>
-#include <storage/storage.h>
-#include <infrared_worker.h>
+
+/*
+ * The original project depended on the Flipper Furi SDK.  The headers are
+ * not available in this workspace, so we substitute minimal stubs that allow
+ * the sources to compile on a host machine.  See `stubs.h` for the actual
+ * definitions and prototypes.
+ */
+
+#include "stubs.h"
 
 #include "Application.h"
 

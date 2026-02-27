@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "F0App.h"
 
 F0App* FApp = 0;

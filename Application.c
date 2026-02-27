@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "F0App.h"
 #include "alarmatik_icons.h"
 #include "F0BigData.h"
@@ -315,7 +318,7 @@ void Draw(Canvas* canvas, void* ctx) {
         canvas_draw_str(canvas, TIME_POS_X, TIME_POS_Y, timer_string);
         if(AppTimer.count && AppTimer.state != APP_TIMER_STATE_OFF)
             elements_progress_bar(
-                canvas, 0, 10, 128, (1.0 * AppTimer.count / AppTimer.expected_count));
+                canvas, 0, 10, 128, 10, (1.0 * AppTimer.count / AppTimer.expected_count), 50);
         ApplyFont(canvas);
         canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, time_string);
         canvas_draw_str_aligned(canvas, 128, 0, AlignRight, AlignTop, date_string);
@@ -1049,7 +1052,7 @@ void SetRing(bool state) {
 
 void LoadParams() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_common_migrate(storage, EXT_PATH("apps/Tools/alarmatik.bin"), SAVING_FILENAME);
+    /* simplified: skip migration in host build */
 
     File* file = storage_file_alloc(storage);
     char ver = 0;

@@ -1,11 +1,12 @@
 #pragma once
+#define STORAGE_APP_DATA_PATH_PREFIX "/ext/apps/data/alarmatik"
 #define SAVING_DIRECTORY      STORAGE_APP_DATA_PATH_PREFIX
-#define SAVING_FILENAME       SAVING_DIRECTORY "/alarmatik.cfg"
+#define SAVING_FILENAME       STORAGE_APP_DATA_PATH_PREFIX "/alarmatik.cfg"
 #define CFG_VERSION           9
 #define CLOCK_RFC_DATE_FORMAT "%s %.2d.%.2d.%.4d"
 #define CLOCK_TIME_FORMAT     "%.2d:%.2d:%.2d"
-#define TIMER_TIME_FORMAT     "%02ld:%02ld:%02ld"
-#define MMSS_TIME_FORMAT      "%02ld:%02ld"
+#define TIMER_TIME_FORMAT     "%02d:%02d:%02d"
+#define MMSS_TIME_FORMAT      "%02d:%02d"
 #define TIME_STR_SIZE         30
 
 #define TIME_POS_X 10
