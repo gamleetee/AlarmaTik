@@ -45,8 +45,10 @@ int32_t F0App_entry(void* p) {
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
 
     FApp = app;
-    app->SystemScreenBrightness = app->Notificator->settings.display_brightness;
-    app->SystemLedBrightness = app->Notificator->settings.led_brightness;
+// SDK no longer exposes notification settings structure, so we
+    // cannot read the current values directly.  Store sane defaults instead.
+    app->SystemScreenBrightness = 1.0f; // assume full backlight
+    app->SystemLedBrightness = 1.0f;    // assume LEDs at full brightness
     AppInit();
     InputEvent event;
     while(1) {
@@ -91,7 +93,22 @@ void SetLED(int r, int g, int b, float br) {
         &message_do_not_reset,
         NULL,
     };
-    FApp->Notificator->settings.led_brightness = br;
+    /* LED brightness is now controlled via a notification message rather
+       than by poking a settings struct.  Map 0.0‑1.0 to 0‑255 and send a
+       special message before the color sequence so future color commands use
+       the requested brightness. */
+    NotificationMessage brightness_msg;
+    brightness_msg.type = NotificationMessageTypeLedBrightnessSettingApply;
+    /* clamp and convert */
+    if(br < 0.f) br = 0.f;
+    if(br > 1.f) br = 1.f;
+    brightness_msg.data.led.value = (uint8_t)(br * 255.f);
+    /* wrap in a one-element sequence */
+     /* wrap the single message in a NotificationSequence using the typedef
+         so that the pointer-to-array matches what notification_message expects */
+     const NotificationSequence seq1 = {&brightness_msg, NULL};
+     notification_message(FApp->Notificator, &seq1);
+
     notification_message(FApp->Notificator, &notification_sequence);
     furi_thread_flags_wait(0, FuriFlagWaitAny, 10);
 }
@@ -102,9 +119,20 @@ void ResetLED() {
 
 /*brightness in % (0-100)*/
 void SetScreenBacklightBrightness(int brightness) {
-    FApp->Notificator->settings.display_brightness = ((float)brightness )/ 100.f;
-  if (brightness)  notification_message(FApp->Notificator, &sequence_display_backlight_on);
- else notification_message(FApp->Notificator, &sequence_display_backlight_off);
+    /* Forge a message to force the display brightness setting.  The
+       notification service will remember this value internally. */
+    NotificationMessage msg;
+    msg.type = NotificationMessageTypeForceDisplayBrightnessSetting;
+    if(brightness < 0) brightness = 0;
+    if(brightness > 100) brightness = 100;
+    msg.data.forced_settings.display_brightness = ((float)brightness) / 100.f;
+    const NotificationSequence seq_msg = {&msg, NULL};
+    notification_message(FApp->Notificator, &seq_msg);
+
+    if(brightness)
+        notification_message(FApp->Notificator, &sequence_display_backlight_on);
+    else
+        notification_message(FApp->Notificator, &sequence_display_backlight_off);
 }
 
 void UpdateView() {

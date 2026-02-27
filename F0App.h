@@ -8,7 +8,7 @@
 #include <input/input.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <notification/notification_app.h>
+#include <notification/notification.h>
 #include <storage/storage.h>
 #include <infrared_worker.h>
 

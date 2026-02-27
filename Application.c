@@ -108,37 +108,44 @@ void notification_BZZZT(int params) {
     bool b = params & BZZZT_FLAG_BLINK;
     bool s = params & BZZZT_FLAG_SOUND;
 
-    if(!b) {
-        sequence_bzzzt[0] = &message_delay_1;
-        sequence_bzzzt[1] = &message_delay_1;
-        sequence_bzzzt[19] = &message_delay_1;
-    } else {
-        sequence_bzzzt[0] = &message_force_display_brightness_setting_1f;
-        sequence_bzzzt[1] = &message_display_backlight_on;
-        sequence_bzzzt[19] = &message_display_backlight_off;
-    }
-
-    if(!v) {
-        sequence_bzzzt[2] = &message_delay_1;
-        sequence_bzzzt[18] = &message_delay_1;
-    } else {
-        sequence_bzzzt[2] = &message_vibro_on;
-        sequence_bzzzt[18] = &message_vibro_off;
-    }
+    /* Always start from the base beginning of the sequence.  This
+       prevents leftover entries from previous invocations causing
+       unexpected tones when the sequence is shortened. */
+    sequence_bzzzt[0] = &message_force_display_brightness_setting_1f;
+    sequence_bzzzt[1] = &message_display_backlight_on;
+    sequence_bzzzt[2] = v ? &message_vibro_on : &message_delay_1;
 
     if(!s) {
-                sequence_bzzzt[3] = &message_delay_500;
-        if(v)   sequence_bzzzt[4] = &message_vibro_off;
-        else    sequence_bzzzt[4] = &message_delay_1;
-        if(b)   sequence_bzzzt[5] = &message_display_backlight_off;
-        else    sequence_bzzzt[5] = &message_delay_1;
+        /* no sound: emit a single pulse (optionally vibro/blink) then end */
+        sequence_bzzzt[3] = &message_delay_500;
+        sequence_bzzzt[4] = v ? &message_vibro_off : &message_delay_1;
+        sequence_bzzzt[5] = b ? &message_display_backlight_off : &message_delay_1;
         sequence_bzzzt[6] = NULL;
+        /* clear any remaining slots so they aren't used later */
+        for(int i = 7; i < (int)(sizeof(sequence_bzzzt) /
+                                  sizeof(sequence_bzzzt[0])); ++i) {
+            sequence_bzzzt[i] = NULL;
+        }
     } else {
+        /* full melody path (same as original initializer) */
         sequence_bzzzt[3] = &message_note_c5;
         sequence_bzzzt[4] = &message_delay_50;
         sequence_bzzzt[5] = &message_sound_off;
         sequence_bzzzt[6] = &message_delay_100;
         sequence_bzzzt[7] = &message_note_c6;
+        sequence_bzzzt[8] = &message_delay_50;
+        sequence_bzzzt[9] = &message_sound_off;
+        sequence_bzzzt[10] = &message_delay_100;
+        sequence_bzzzt[11] = &message_note_c5;
+        sequence_bzzzt[12] = &message_delay_50;
+        sequence_bzzzt[13] = &message_sound_off;
+        sequence_bzzzt[14] = &message_delay_100;
+        sequence_bzzzt[15] = &message_note_c6;
+        sequence_bzzzt[16] = &message_delay_50;
+        sequence_bzzzt[17] = &message_sound_off;
+        sequence_bzzzt[18] = v ? &message_vibro_off : &message_delay_1;
+        sequence_bzzzt[19] = b ? &message_display_backlight_off : &message_delay_1;
+        sequence_bzzzt[20] = NULL;
     }
     notification_message(FApp->Notificator, &sequence_bzzzt);
 }
